@@ -52,7 +52,7 @@ style: |
 <!--
 Sections 1-5. Six slides, and every number on them was re-measured from the
 notebook rather than copied from an earlier draft. Denominator is stated on
-each slide, because it changes: 100 sampled -> 99 scored -> 95 crops -> 26 fused.
+each slide, because it changes: 100 sampled -> 99 scored -> 78 crops -> 26 fused.
 -->
 
 ---
@@ -154,9 +154,9 @@ out of 100 at exactly 480 x 140.
 
 ![w:620](assets/a-ceiling.png)
 
-- **Below IoU 0.5 the reader is nearly blind** - 8.3% whole-plate on 36 images, against 59.3% above it
+- **Below IoU 0.5 the reader is nearly blind** - 11.5% whole-plate on 26 images, against 67.3% above it
 - **Nothing in the OCR explains that gap** - same reader, same binariser, same format rules; only the crop differs
-- **Here is why the two numbers never merge** - 40.0% over 95 crops is what a user gets; 69.2% over the 26 curated ones is what a good crop buys
+- **Here is why the two numbers never merge** - 48.7% over 78 crops is what a user gets; 69.2% over the 26 curated ones is what a good crop buys
 - **So the next effort belongs upstream** - a learned plate detector replaces the colour mask and the hand-tuned score, keeping the mask handover and the 480 x 140 contract
 
 <!--
@@ -217,9 +217,9 @@ Hong Kong plates use a stroke weight, aspect ratio and surface texture that no a
 | Custom CNN, synthetic (7 Windows fonts) | 0 / 7 |
 | EasyOCR whole image, no own segmentation | 5 / 7 |
 | **Ours: own split + EasyOCR per line** | **7 / 7** |
-| **§9 - rectified pipeline output** | **95 / 26 crops** |
-| Single path, own split only | 32.6% / 61.5% |
-| **Two-path fusion** | **40.0% / 69.2%** |
+| **§9 - rectified pipeline output** | **78 / 26 crops** |
+| Single path, own split only | 39.7% / 61.5% |
+| **Two-path fusion** | **48.7% / 69.2%** |
 
 ---
 
@@ -255,25 +255,25 @@ Hong Kong plates use a stroke weight, aspect ratio and surface texture that no a
 
 ![w:690](assets/b-results-scope.png)
 
-- **Different denominators, on purpose** - 99 images, 95 crops, 26 high-IoU crops; never merged
-- **Fusion pays** - +7.4 points on 95 crops, +7.7 on the 26 crops
+- **Different denominators, on purpose** - 99 images, 78 crops, 26 high-IoU crops; never merged
+- **Fusion pays** - +9.0 points on 78 crops, +7.7 on the 26 crops
 - **Geometry pays more** - 57.7% to 69.2% once GEO-01 replaced a plain resize
 - **The upper bound** - 7/7 clean crops; the gap to 39.4% is localisation, not OCR
 
 <!--
 Q&A guard - do not volunteer this, only answer if asked.
 
-Likely question: the A-line slide says 21 of 99 stop at the 0.60 gate, so 78
-crops reach us. Why does this slide say 95?
+Likely question: why 78 crops and not 99 images?
 
-Answer: the 95-crop set was measured before the colour-mask ladder was added.
-The ladder changed candidate scores, so the pipeline now produces 78 crops and
-the other 17 are no longer generated - all 17 score 0.457 to 0.597, below the
-0.60 gate, and none of them reads correctly.
+Answer: the locator gates candidates at 0.60, so 21 of the 99 images never
+produce a crop and never reach us. The 78 that do are the honest denominator
+for the OCR stage; the 99-image bar keeps those localisation failures in, which
+is why the two are reported side by side and never averaged.
 
-Re-measured on the 78 crops the current pipeline actually produces:
-two-path fusion 48.7% (38/78), own split only 39.7% (31/78), so fusion is worth
-+9.0 points rather than +7.4. CER drops from 0.482 to 0.385.
+An earlier draft used a 95-crop set measured before the colour-mask ladder was
+added. The ladder changed candidate scores, 17 of those crops now score 0.457
+to 0.597 - below the gate - and none of the 17 reads correctly, so they were
+dropped rather than quietly kept in the denominator.
 
 The 26-crop and 7/7 numbers are unaffected - they are a different denominator.
 -->
@@ -284,7 +284,7 @@ The 26-crop and 7/7 numbers are unaffected - they are a different denominator.
 
 ![w:620](assets/b-errors.png)
 
-- **45 of 57 wrong plates are missing characters** - and 5 of those came back completely empty
-- **The other 12 are not missing** - 11 keep the same length (5 differ by one glyph: 1-6, 3-8, C-G, W-H, Z-L; 6 differ by two or more, e.g. 960GKF to TER209) and 1 gains a character (DM6368 to DMA6368)
+- **29 of 40 wrong plates are missing characters** - the reader never got them, including the plates it returned empty
+- **The other 11 are not missing** - 10 keep the same length (4 differ by one glyph: 3-8, C-G, W-H, Z-L; 6 differ by two or more, e.g. 960GKF to TER209) and 1 gains a character (DM6368 to DMA6368)
 - **Why** - the crop still holds bumper and bodywork; dark regions merge into the text band
 - **A position prior is not the fix** - all five one-glyph predictions already pass the HK format check; they need a tighter crop upstream, not more grammar
