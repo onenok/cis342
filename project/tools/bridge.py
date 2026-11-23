@@ -359,21 +359,32 @@ def render_board() -> str:
 
     NCOL = 7
     rows: list[str] = []
-    # 指標要插在「該身分收到的最後一則已讀訊息」下面，所以先算出那個 seq 當錨點。
-    # 用收到的訊息而不是全部訊息，指標才會跳過自己發出去的那些。
-    anchor: dict[str, int | None] = {}
+    # 指標要落在「該身分收到的訊息」的邊界上（上面未讀、下面已讀），
+    # 但緊鄰在錨點上方、由他自己發出的訊息要一併跳過 ——
+    # 否則他自己的訊息會壓在自己的指針上面，看起來像他沒讀自己的訊息。
+    rev = list(reversed(shown))
+    insert_at: dict[str, int] = {}
     for p in peers:
         cur = cursors.get(p, 0)
-        got = [int(m.get("seq", 0)) for m in shown
-               if _received_by(m, p) and int(m.get("seq", 0)) <= cur]
-        anchor[p] = max(got) if got else None
+        idx = None
+        for i, m in enumerate(rev):
+            if _received_by(m, p) and int(m.get("seq", 0)) <= cur:
+                idx = i
+                break
+        if idx is None:
+            insert_at[p] = len(rev)          # 沒有已讀紀錄 → 落在表格最底
+            continue
+        j = idx
+        while j - 1 >= 0 and str(rev[j - 1].get("from", "")).strip() == p:
+            j -= 1                            # 跳過自己發的那一串
+        insert_at[p] = j
 
     pending = {p: True for p in peers}
 
-    for m in reversed(shown):
+    for pos, m in enumerate(rev):
         seq = int(m.get("seq", 0))
 
-        boundary = [p for p in peers if pending[p] and anchor[p] == seq]
+        boundary = [p for p in peers if pending[p] and insert_at[p] == pos]
         if boundary:
             for p in boundary:
                 pending[p] = False
