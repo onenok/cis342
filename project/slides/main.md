@@ -284,7 +284,7 @@ The 26-crop and 7/7 numbers are unaffected - they are a different denominator.
 
 ![w:620](assets/b-errors.png)
 
-- **29 of 40 wrong plates are missing characters** - the reader never got them, including the plates it returned empty
+- **29 of 40 wrong plates are missing characters** - the reader never got them; 2 came back completely empty
 - **The other 11 are not missing** - 10 keep the same length (4 differ by one glyph: 3-8, C-G, W-H, Z-L; 6 differ by two or more, e.g. 960GKF to TER209) and 1 gains a character (DM6368 to DMA6368)
 - **Why** - the crop still holds bumper and bodywork; dark regions merge into the text band
-- **A position prior is not the fix** - all five one-glyph predictions already pass the HK format check; they need a tighter crop upstream, not more grammar
+- **A position prior is not the fix** - all four one-glyph predictions already pass the HK format check; they need a tighter crop upstream, not more grammar

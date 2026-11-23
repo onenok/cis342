@@ -127,6 +127,17 @@ def _visible_for(msg: dict, peer: str) -> bool:
     return to == peer
 
 
+def _received_by(msg: dict, peer: str) -> bool:
+    """這則訊息是否落在 peer 的收件匣裡 —— 自己發的不算。
+
+    已讀位置只描述「我收到並看到哪裡」，自己發出去的訊息與這個位置無關，
+    所以指標、未讀數、逐則狀態都只用這一條判準。
+    """
+    if str(msg.get("from", "")).strip() == peer:
+        return False
+    return _visible_for(msg, peer)
+
+
 def next_seq(msgs: list[dict]) -> int:
     return max((int(m.get("seq", 0)) for m in msgs), default=0) + 1
 
@@ -332,12 +343,12 @@ def render_board() -> str:
     peers = _board_peers(msgs, cursors)
     shown = msgs[-200:]
 
-    # 每個身分的未讀張數（與 read_inbox 同一條判準）
+    # 每個身分的未讀張數（與 read_inbox 同一條判準；自己發的不算）
     chips = []
     for p in peers:
         cur = cursors.get(p, 0)
         unread = sum(1 for m in msgs
-                     if _visible_for(m, p) and int(m.get("seq", 0)) > cur)
+                     if _received_by(m, p) and int(m.get("seq", 0)) > cur)
         state = "ok" if unread == 0 else "new"
         chips.append(
             f"<span class='chip {state}'>{_esc(p)}"
@@ -348,13 +359,21 @@ def render_board() -> str:
 
     NCOL = 7
     rows: list[str] = []
-    # 從最新往舊印，所以每個身分的指標只會插入一次：第一次遇到 seq <= cursor 的位置。
+    # 指標要插在「該身分收到的最後一則已讀訊息」下面，所以先算出那個 seq 當錨點。
+    # 用收到的訊息而不是全部訊息，指標才會跳過自己發出去的那些。
+    anchor: dict[str, int | None] = {}
+    for p in peers:
+        cur = cursors.get(p, 0)
+        got = [int(m.get("seq", 0)) for m in shown
+               if _received_by(m, p) and int(m.get("seq", 0)) <= cur]
+        anchor[p] = max(got) if got else None
+
     pending = {p: True for p in peers}
 
     for m in reversed(shown):
         seq = int(m.get("seq", 0))
 
-        boundary = [p for p in peers if pending[p] and seq <= cursors.get(p, 0)]
+        boundary = [p for p in peers if pending[p] and anchor[p] == seq]
         if boundary:
             for p in boundary:
                 pending[p] = False
@@ -362,9 +381,9 @@ def render_board() -> str:
                 f"{_esc(p)} 已讀到 #{cursors.get(p, 0)}" for p in boundary)
             rows.append(
                 f"<tr class='ptr'><td colspan={NCOL}>▲ 已讀指標 —— {labels}"
-                f"（此線以上的訊息對該身分為未讀）</td></tr>")
+                f"（此線以上<b>寄給</b>該身分的訊息為未讀；他自己發的不計）</td></tr>")
 
-        recipients = [p for p in peers if _visible_for(m, p)]
+        recipients = [p for p in peers if _received_by(m, p)]
         unread_for = [p for p in recipients if seq > cursors.get(p, 0)]
         if recipients:
             badges = "".join(
@@ -372,7 +391,7 @@ def render_board() -> str:
                 f"{_esc(p)} {'已讀' if seq <= cursors.get(p, 0) else '未讀'}</span>"
                 for p in recipients)
         else:
-            badges = "<span class='badge'>—</span>"
+            badges = "<span class='badge self'>本方發出</span>"
 
         reply = (f"<div class='reply'>↳ 回覆 #{m['reply_to']}</div>"
                  if m.get("reply_to") else "")
@@ -385,12 +404,12 @@ def render_board() -> str:
             f"<td class='t'>{_esc(m.get('text')).replace(chr(10), '<br>')}{reply}</td>"
             f"<td class='ts'>{_esc(str(m.get('ts'))[:19])}</td></tr>")
 
-    for p in peers:            # cursor 之後沒有更舊的訊息時，指標落在表格最底
+    for p in peers:            # 沒有更舊的已讀訊息時，指標落在表格最底
         if pending[p]:
             cur = cursors.get(p, 0)
             rows.append(
                 f"<tr class='ptr'><td colspan={NCOL}>▲ 已讀指標 —— {_esc(p)} 已讀到 #{cur}"
-                f"（此線以上全部為未讀）</td></tr>")
+                f"（以下沒有更舊的訊息）</td></tr>")
 
     body = "\n".join(rows) or f"<tr><td colspan={NCOL}>（尚無訊息）</td></tr>"
     return f"""<!doctype html><html><head><meta charset="utf-8">
@@ -416,6 +435,7 @@ def render_board() -> str:
         font-size:11px;border:1px solid transparent}}
  .badge.ok{{background:#e3f4f0;color:#1f7a6d;border-color:#bfe4dc}}
  .badge.new{{background:#fdf0dd;color:#a86a12;border-color:#f0d3a0;font-weight:600}}
+ .badge.self{{background:#f2f2f5;color:#8a8f99;border-color:#e2e4ea}}
  tr.unread td{{background:#fffdf7}}
  tr.unread td.seq{{box-shadow:inset 3px 0 0 #E9A13B}}
  tr.ptr td{{background:#f6f8fa;color:#33658A;font-size:11.5px;
