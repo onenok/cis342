@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f7f8fa">
+<title>A 線講稿（台上版）｜CIS342 Group 6</title>
+<style>
+  :root{
+    --bg:#f7f8fa;
+    --card:#ffffff;
+    --ink:#14161c;
+    --ink2:#3d424e;
+    --cue:#8b909c;
+    --line:#e3e6ec;
+    --blue:#1668e3;
+    --blue-soft:#eaf1fd;
+    --amber:#b26b00;
+    --amber-soft:#fdf3e0;
+    --red:#c0392b;
+    --grey-soft:#f0f2f5;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+
+  /* ---------- 頂部資訊 ---------- */
+  .top{max-width:600px;margin:0 auto;padding:18px 18px 10px;}
+  .top h1{font-size:15px;font-weight:650;letter-spacing:.02em;margin:0 0 6px;color:var(--ink);}
+  .meta{font-size:12px;color:var(--cue);line-height:1.6;}
+  .meta b{color:var(--ink2);font-weight:600;}
+
+  /* ---------- 快速跳頁 ---------- */
+  .nav{
+    position:sticky;top:0;z-index:10;
+    background:rgba(247,248,250,.92);
+    backdrop-filter:saturate(180%) blur(12px);
+    -webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line);
+    padding:7px 12px;display:flex;gap:6px;justify-content:center;
+    overflow-x:auto;scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none;}
+  .nav a{
+    flex:0 0 auto;text-decoration:none;font-size:11.5px;font-weight:600;
+    color:var(--ink2);background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:4px 11px;line-height:1.35;
+  }
+  .nav a:active{background:var(--blue-soft);}
+
+  /* ---------- 章節 ---------- */
+  .wrap{max-width:600px;margin:0 auto;padding:0 14px;}
+
+  section.slide{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    margin:16px 0;overflow:hidden;scroll-margin-top:56px;
+  }
+  .shead{
+    display:flex;align-items:baseline;gap:9px;padding:12px 16px;
+    border-bottom:1px solid var(--line);background:var(--grey-soft);
+  }
+  .snum{
+    flex:0 0 auto;font-size:12px;font-weight:700;color:#fff;background:var(--blue);
+    border-radius:6px;min-width:22px;height:22px;display:flex;align-items:center;
+    justify-content:center;padding:0 6px;
+  }
+  .stitle{flex:1 1 auto;font-size:13px;font-weight:650;color:var(--ink);line-height:1.35;}
+  .stime{flex:0 0 auto;font-size:11px;font-weight:600;color:var(--cue);font-variant-numeric:tabular-nums;}
+  .sbody{padding:6px 16px 14px;}
+
+  /* ---------- 語塊 ---------- */
+  .blk{position:relative;padding:13px 0 11px;border-bottom:1px dashed var(--line);}
+  .blk:last-child{border-bottom:0;}
+
+  .blk.l1, .blk.l2, .blk.l3{padding-left:11px;}
+  .blk.l1{box-shadow:inset 3px 0 0 var(--blue);}
+  .blk.l2{box-shadow:inset 3px 0 0 #c9ced8;}
+  .blk.l3{box-shadow:inset 3px 0 0 #e0a33a;}
+
+  .en{
+    font-size:clamp(16.5px,4.35vw,20px);
+    line-height:1.75;font-weight:450;letter-spacing:.002em;color:var(--ink);
+  }
+  .en strong{font-weight:700;color:#000;}
+  .en em{font-style:italic;color:#5a5f6b;}
+  .en .paren{color:#9aa0ad;font-size:.82em;font-weight:400;}
+
+  .lead{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11.5px;line-height:1.55;color:#9aa0ad;margin:0 0 5px;letter-spacing:-.01em;
+  }
+  .lead::before{content:"↳ ";color:#c3c8d2;}
+
+  .tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;
+    border-radius:4px;padding:1px 5px;vertical-align:2px;
+  }
+  .tag.t1{color:#fff;background:var(--blue);}
+  .tag.t2{color:var(--ink2);background:var(--grey-soft);border:1px solid var(--line);}
+  .tag.t3{color:var(--amber);background:var(--amber-soft);border:1px solid #f0d9ae;}
+
+  /* ---------- 英文照讀版 ---------- */
+  .zh{
+    margin-top:8px;font-size:13.5px;line-height:1.72;color:#3d434f;
+    background:#f5f7fa;border:1px solid #e8ebf1;border-radius:8px;
+    padding:8px 11px;letter-spacing:.005em;
+  }
+  .zh b{color:#111318;font-weight:700;}
+  body.nozh .zh{display:none;}
+
+  body.nocue .pron,
+  body.nocue .cue{display:none;}
+
+  .toggles{display:flex;gap:8px;justify-content:center;margin:10px auto 2px;}
+
+  .zhT{
+    display:block;margin:0;font:inherit;font-size:12px;font-weight:700;color:#3d434f;
+    background:#fff;border:1px solid #d9dee7;border-radius:999px;padding:6px 18px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .zhT[data-off="1"]{background:#eceff4;color:#828a99;}
+
+  /* ---------- 讀音框 ---------- */
+  .pron{
+    margin:8px 0 4px;background:#fbfaff;border:1px solid #e2ddf5;border-radius:9px;
+    padding:9px 11px;font-size:12.5px;line-height:1.78;color:#4a4460;
+  }
+  .pron .wt{
+    display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+    color:#7b6bb8;margin-bottom:4px;
+  }
+  .pron b{color:#241f38;font-weight:700;}
+  .pron code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12px;background:#f0edfa;border-radius:4px;padding:1px 5px;color:#4b3ea0;
+  }
+  .pron .say{font-weight:700;color:#2f2a45;letter-spacing:.01em;}
+
+  /* ---------- 跳過優先次序 ---------- */
+  .skp{
+    display:inline-block;margin-top:7px;font-size:11px;font-weight:700;letter-spacing:.01em;
+    color:#8a5a00;background:#fff6e5;border:1px solid #f0d9ae;border-radius:7px;
+    padding:3px 9px;line-height:1.5;
+  }
+
+  .cue{
+    margin-top:8px;font-size:12px;line-height:1.62;color:var(--cue);
+    border-left:2px solid var(--line);padding-left:9px;
+  }
+  .cue b{color:#6d7280;font-weight:650;}
+
+  /* ---------- 停頓 ---------- */
+  .p1, .p2{font-weight:700;font-style:normal;}
+  .p1{color:var(--cue);}
+  .p2{
+    color:var(--amber);background:var(--amber-soft);border-radius:4px;
+    padding:0 5px;font-size:.85em;letter-spacing:.06em;white-space:nowrap;
+  }
+
+  /* ---------- 警告 / 提示 ---------- */
+  .warn{
+    margin-top:11px;background:#fff5f4;border:1px solid #f6d4d0;border-radius:9px;
+    padding:9px 11px;font-size:12px;line-height:1.62;color:#8d3226;
+  }
+  .warn .wt{
+    display:block;font-weight:700;font-size:11px;letter-spacing:.04em;
+    color:var(--red);margin-bottom:3px;
+  }
+  .warn ul{margin:0;padding-left:1.1em;}
+  .warn li{margin:1px 0;}
+
+  .tip{
+    margin-top:11px;background:var(--blue-soft);border:1px solid #cfe0fb;
+    border-radius:9px;padding:9px 11px;font-size:12px;line-height:1.62;color:#1b4a94;
+  }
+  .tip .wt{
+    display:block;font-weight:700;font-size:11px;letter-spacing:.04em;
+    color:var(--blue);margin-bottom:3px;
+  }
+
+  /* ---------- 附錄清單 ---------- */
+  .list{margin:0;padding:0;list-style:none;}
+  .list li{padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.6;}
+  .list li:last-child{border-bottom:0;}
+  .list .k{
+    display:block;font-size:11px;font-weight:700;letter-spacing:.04em;
+    color:var(--cue);margin-bottom:2px;
+  }
+  .list .v{color:var(--ink);}
+  .list .v b{font-weight:650;}
+
+  .cheat{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11px;line-height:1.75;white-space:pre-wrap;word-break:break-word;
+    background:#12151c;color:#e8ecf3;border-radius:11px;padding:12px 13px;overflow-x:auto;
+  }
+  .cheat .hl{color:#7fb2ff;font-weight:700;}
+  .cheat .warn2{color:#ffb4a8;}
+
+  .legend{
+    max-width:600px;margin:0 auto 6px;padding:0 18px;
+    font-size:11.5px;color:var(--cue);line-height:1.8;
+  }
+  .legend span{display:inline-block;margin-right:11px;white-space:nowrap;}
+
+  .end{text-align:center;font-size:11.5px;color:var(--cue);padding:22px 0 6px;}
+
+  @media print{
+    .nav{display:none;}
+    body{background:#fff;padding:0;}
+    section.slide{break-inside:avoid;box-shadow:none;}
+  }
+
+  /* ---------- 橫向手機：一屏並排兩個語塊 ---------- */
+  @media (orientation:landscape) and (max-height:560px) and (max-width:1000px){
+    body{padding:8px 8px 16px;}
+    .top h1{font-size:15px;}
+    .top .meta{font-size:11px;}
+    section.slide{margin:10px 0;border-radius:12px;}
+    .shead{padding:7px 12px;}
+    .stitle{font-size:13px;}
+
+    .sbody{
+      display:flex;flex-wrap:wrap;align-items:flex-start;gap:0 14px;padding:4px 12px 10px;
+    }
+    .sbody > .blk{flex:1 1 45%;min-width:0;}
+    .sbody > .blk.solo{flex:0 0 100%;}
+    .tip,.warn{flex:0 0 100%;}
+
+    .blk{padding:9px 0 8px;}
+    .lead{font-size:10.5px;margin-bottom:3px;}
+    .en{font-size:clamp(12.5px,2.1vw,16px);line-height:1.55;}
+    .zh{font-size:12px;line-height:1.55;padding:6px 9px;margin-top:6px;}
+    .cue,.skp{font-size:11px;line-height:1.45;}
+    .pron{font-size:11px;line-height:1.5;}
+    .pron .say{font-size:11px;}
+
+    .wrap{max-width:none;padding:0 10px;}
+    .top,.legend{max-width:none;}
+    .top{padding:8px 12px 4px;}
+    .top h1{font-size:14px;margin-bottom:3px;}
+    .meta{font-size:10.5px;line-height:1.45;}
+    .nav{padding:4px 10px;gap:4px;}
+    .nav a{font-size:10.5px;padding:3px 7px;}
+    .legend{max-width:none;font-size:10px;line-height:1.5;padding:0 12px;margin-bottom:4px;}
+    .legend span{margin-right:8px;}
+    .zhT{padding:4px 12px;font-size:11px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>A 線 — Image to a Rectified Crop　台上講稿</h1>
+  <div class="meta">
+    目標 <b>375 秒</b>（約 6 分 15 秒）｜中文語序版 <b>約 330 字</b>，英文照讀版 <b>約 260 詞</b><br>
+    交付 <b>20 秒</b>（第 7 頁）｜語速不用刻意快 —— <b>慢 30 秒內都不需要跳句</b>，真的超時才按當頁的 <b>&#10178;1</b><br>
+    <b>第 6 頁是全段重心</b>，前面可以快，那裡一定要慢｜上台前 30 秒只看「數字」那一頁
+  </div>
+</div>
+<div class="toggles">
+  <button class="zhT" id="zhT" onclick="var b=document.body;b.classList.toggle('nozh');this.dataset.off=b.classList.contains('nozh')?1:0;this.textContent=b.classList.contains('nozh')?'英文照讀版：關（練翻譯）':'英文照讀版：開'">英文照讀版：開</button>
+  <button class="zhT" id="cueT" onclick="var b=document.body;b.classList.toggle('nocue');this.dataset.off=b.classList.contains('nocue')?1:0;this.textContent=b.classList.contains('nocue')?'讀音與提示：關（只剩講稿）':'讀音與提示：開'">讀音與提示：開</button>
+</div>
+
+<nav class="nav">
+  <a href="#s0">0</a>
+  <a href="#s1">1</a>
+  <a href="#s2">2</a>
+  <a href="#s3">3</a>
+  <a href="#s4">4</a>
+  <a href="#s5">5</a>
+  <a href="#s6">6</a>
+  <a href="#s7">7</a>
+  <a href="#n">數字</a>
+  <a href="#h">交接</a>
+</nav>
+
+<div class="legend">
+  <span><span class="tag t1">L1</span> 核心，不砍</span>
+  <span><span class="tag t2">L2</span> 支撐</span>
+  <span><span class="tag t3">L3</span> 可丟</span>
+  <span><span class="p1">‖</span> 停半秒</span>
+  <span><span class="p2">‖‖</span> 停 2 秒</span>
+  <span><b>&#10178;1</b> 時間不夠先跳這個</span>
+  <span>灰底 = 英文照讀版（可關閉）</span>
+  <span>括號 <span class="paren">(like this)</span> = 那個詞的英文</span>
+</div>
+
+<div class="wrap">
+
+<!-- ============ S0 封面 + 分隔頁 ============ -->
+<section class="slide" id="s0">
+  <div class="shead">
+    <span class="snum">0</span>
+    <span class="stitle">封面，然後轉入第一部份</span>
+    <span class="stime">0:00–0:25</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="en">早安，我們 是 第六組。 <span class="paren">(Good morning, we are Group 6.)</span><br>
+我 是 HO NOK HEI，我 的 隊友 是 LI CHI SHING。<br>
+今天 我們 會 報告 我們 的 車牌辨識系統。 <span class="paren">(licence plate recognition)</span></div>
+      <div class="zh">Good morning everyone. We are Group 6.<br>
+I'm HO NOK HEI, and my teammate is LI CHI SHING.<br>
+Today we'll present our licence plate recognition system.</div>
+      <div class="skp">&#10178;1　第二、三句可省（省 6 秒），直接講「我們分成兩部份」</div>
+      <div class="cue">一開聲就講這句，不要等、不要清喉嚨、不要說「err」—— 聲音會穩。<br>
+自己的名字照讀；<b>隊友的名字上台前確認一次讀音</b>，不要臨場拼。<br>
+<b>licence</b> 是英式拼法（香港用英式），讀 <i>LAI-suhns</i>，不是「li-cense」兩個音節分開。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>licence</b>　<span class="say">LAI-suhns</span>　<code>/ˈlaɪ.səns/</code>　兩個音節，重音在第一個。<br>
+        中間的 <code>c</code> 讀 <b>s</b> 音（不是 k）；尾音 <code>-ce</code> 輕輕收，不要讀成「lai-sen-se」。<br>
+        <b>recognition</b>　<span class="say">rek-uhg-NISH-uhn</span>　<code>/ˌrek.əɡˈnɪʃ.ən/</code>　四個音節，重音在<b>第三</b>個。<br>
+        <code>g</code> 要讀出來（<b>g</b>-nish），不要吞掉變成「rek-uh-NISH-uhn」。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">我們 把 它 分成 兩 個 部份。 <span class="paren">(split into two parts)</span><br>
+我 做 第一 個 部份，從 一張 相片 到 一個 校正好的裁切圖。 <span class="paren">(rectified crop)</span><br>
+我 的 隊友 做 第二 個 部份，從 一個 裁切圖 到 一個 車牌字串。 <span class="paren">(plate string)</span></div>
+      <div class="zh">We split it into two parts.<br>
+I'll cover the first part — from one photo to a rectified crop.<br>
+My teammate will cover the second part — from a rectified crop to a plate string.</div>
+      <div class="cue">這三句是整場的地圖，<b>一定要講完整</b>，後面每一頁都掛在這條線上。<br>
+「校正好的裁切圖」是全場最關鍵的名詞 —— 我這邊所有數字的分母都是它，隊友那邊所有的輸入也是它。<b>講慢一點</b>。<br>
+講完停半秒，再轉頁。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>rectified</b>　<span class="say">REK-ti-fyd</span>　<code>/ˈrek.tɪ.faɪd/</code>　三個音節，重音在<b>第一</b>個。<br>
+        <b>crop</b>　<code>/krɒp/</code>　單音節，<code>r</code> 要捲舌，尾音 <code>p</code> 閉唇收住。<br>
+        <b>string</b>（字串）　<code>/strɪŋ/</code>　單音節，<code>str</code> 不要加音變成「su-tring」。
+      </div>
+    </div>
+
+    <div class="blk l2 solo">
+      <div class="en">首先，第一 個 部份。 <span class="paren">(A-line)</span></div>
+      <div class="zh">First, the first half.</div>
+      <div class="cue">轉頁句。四個字，講完就轉，<b>不要</b>加「let's get started」「so now I will explain」之類 —— 那會多花 3 秒而且顯得沒準備。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S1 資料集 ============ -->
+<section class="slide" id="s1">
+  <div class="shead">
+    <span class="snum">1</span>
+    <span class="stitle">100 plates, no plate strings in the source</span>
+    <span class="stime">0:25–1:25</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So where does the data come from?</div>
+      <div class="en">第一，資料。 <span class="paren">(data)</span><br>
+我們 用 一個 公開的資料集，叫 Roboflow <strong>hk-fszrn</strong>。<br>
+它 有 1,491 張 相片，授權 是 CC BY 4.0。<br>
+我們 抽 100 張，用 一個 固定的隨機種子。 <span class="paren">(fixed random seed)</span></div>
+      <div class="zh">First, the data.<br>
+We used a public dataset called Roboflow hk-fszrn.<br>
+It has 1,491 images, licensed CC BY 4.0.<br>
+We sampled 100 of them with a fixed random seed.</div>
+      <div class="cue">開場先給「公開 + 授權」，這是學術專題第一個會被問的問題，先講掉。<br>
+<b>1,491</b> 讀 <i>one thousand four hundred and ninety-one</i>，不要讀成「一四九一」。<br>
+<b>固定隨機種子</b> 這句是鋪路 —— 下一句的指紋要靠它。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>dataset</b>　<span class="say">DAY-tuh-set</span>　<code>/ˈdeɪ.tə.set/</code>　重音在<b>第一</b>個。<br>
+        <b>sampled</b>　<span class="say">SAAM-puhld</span>　<code>/ˈsɑː.mpəld/</code>　尾音 <code>-pled</code> 要讀出來，不要變成「sam-pu」。<br>
+        <b>seed</b>　<code>/siːd/</code>　單音節，長音 <b>ee</b>，不要讀短。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">所以 我們 得到 一個 指紋，<strong>bd1a4489</strong>。<br>
+如果 種子 一樣，抽出來 的 100 張 一定 一樣。 <span class="paren">(fingerprint)</span></div>
+      <div class="zh">So we get a fingerprint, bd1a4489.<br>
+Same seed, same 100 files — every time.</div>
+      <div class="skp">&#10178;1　指紋那串可省（省 5 秒），只講「同樣的種子抽到同樣的 100 張」</div>
+      <div class="cue"><b>指紋</b> 直接讀字母數字：<i>b-d-one-a-four-four-eight-nine</i>，不要試著當成一個字讀。<br>
+為什麼要講這句：下一句會說「字串是我們手打的」，如果抽樣不穩定，<b>標註就會對錯相片</b>。這句是為下一句鋪路，不是炫技。<br>
+若台下沒反應，這句可以整句跳過，直接講下一格。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>fingerprint</b>　<span class="say">FING-guh-print</span>　<code>/ˈfɪŋ.ɡə.prɪnt/</code>　重音在<b>第一</b>個。<br>
+        中間的 <code>g</code> 和後面的 <code>p</code> 要分開，不要連成「finger-print」一坨。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">為什麼 這 很 重要？<br>
+因為 資料集 只 提供 <strong>邊界框</strong>，沒有 提供 車牌字串。 <span class="paren">(bounding boxes)</span><br>
+所以 每一個 字串 在 labels.csv 是 我們 一個 一個 <strong>手動打的</strong>。 <span class="paren">(typed by hand)</span></div>
+      <div class="zh">Why does that matter?<br>
+Because the dataset ships bounding boxes, not plate strings.<br>
+So every plate string in labels.csv was typed by hand.</div>
+      <div class="cue"><b>這是本頁最重要的一句</b>：我們的標註是自己做的，不是抄現成的。這是加分項，不是弱點，語氣要正面，不要講得像在道歉。<br>
+「為什麼這很重要」是真問句，語氣上揚，停半秒才答。<br>
+<b>bounding box</b> 不要逐字讀成「邊-界-框」，講 <i>bounding box</i> 就好，這是行內標準說法。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>bounding</b>　<span class="say">BOWN-ding</span>　<code>/ˈbaʊn.dɪŋ/</code>　重音在第一個，<code>ou</code> 讀「傲」不是「烏」。<br>
+        <b>annotation</b>（標註，若用到）　<span class="say">an-uh-TAY-shuhn</span>　<code>/ˌæn.əˈteɪ.ʃən/</code>　重音在<b>第三</b>個。
+      </div>
+    </div>
+
+    <div class="blk l2">
+      <div class="en">我們 丟掉 16 張 候選，因為 車牌框 窄過 40 像素。 <span class="paren">(candidates / pixels)</span><br>
+我們 也 記錄 難度：89 張 正常、10 張 難、1 張 讀不到。<br>
+那 1 張 我們 從 所有 指標 排除。 <span class="paren">(metrics)</span></div>
+      <div class="zh">We dropped 16 candidates — the plate box was narrower than 40 pixels.<br>
+We also recorded difficulty: 89 normal, 10 hard, 1 unreadable.<br>
+The unreadable one is excluded from every metric.</div>
+      <div class="skp">&#10178;1　89 / 10 / 1 那一行可省（省 6 秒）</div>
+      <div class="cue">「1 張從所有指標排除」一定要講 —— 這是<b>方法論的誠實</b>，說明我們知道自己有一張沒有可靠答案，而且沒有偷偷把它算進正確率。<br>
+台下若問「為什麼排除」，答：<i>It has no reliable answer, so counting it would create a fake error.</i></div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>candidate</b>　<span class="say">KAN-di-duht</span>　<code>/ˈkæn.dɪ.dət/</code>　三個音節，重音在<b>第一</b>個。<br>
+        結尾 <code>-date</code> 讀 <b>duht</b>（輕），不要讀成「dayt」。<br>
+        <b>unreadable</b>　<span class="say">un-REE-duh-buhl</span>　<code>/ʌnˈriː.də.bəl/</code>　重音在<b>第二</b>個。
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="wt">這一頁只講三件事</span>
+      公開資料集 ＋ 手動標註 ＋ 難度有記錄。<b>不要</b>在這裡講模型、不要講準確率 —— 數字留到第 3 頁和第 6 頁，這一頁只負責建立「我們的資料是可信的」。
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S2 定位 ============ -->
+<section class="slide" id="s2">
+  <div class="shead">
+    <span class="snum">2</span>
+    <span class="stitle">Localisation is a proposal step, not a detector</span>
+    <span class="stime">1:25–2:20</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So how do we find the plate?</div>
+      <div class="en">第二，定位。 <span class="paren">(localisation)</span><br>
+我們 沒有 用 學習型的偵測器。 <span class="paren">(learned detector)</span><br>
+我們 用 顏色遮罩、輪廓、四邊形。 <span class="paren">(colour mask / contour / quad)</span><br>
+所以 這 是 <strong>幾何</strong> 加上 一個 <strong>手動設計的評分</strong>。 <span class="paren">(geometry / hand-designed score)</span></div>
+      <div class="zh">Second, localisation.<br>
+We don't use a learned detector.<br>
+We use a colour mask, a contour, and a quad.<br>
+So it's geometry plus a hand-designed score.</div>
+      <div class="cue">「沒有用學習型偵測器」要<b>直接講</b>，不要含糊 —— 這是設計選擇，不是做不到。<b>第 6 頁</b>會說「下一步該換成學習型偵測器」，兩句要一致：現在是幾何，未來是學習。<br>
+「幾何 + 手動評分」是這頁的定位句，講完停半秒。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>localisation</b>　<span class="say">loh-kuhl-ai-ZAY-shuhn</span>　<code>/ˌləʊ.kəl.aɪˈzeɪ.ʃən/</code>　五個音節，重音在<b>第四</b>個（ZAY）。<br>
+        ⚠️ 不要讀成「lo-ka-li-ZA-shun」少一個音節；結尾 <code>-tion</code> 讀 <b>shun</b>。<br>
+        <b>contour</b>　<span class="say">KON-too-uh</span>　<code>/ˈkɒn.tʊə/</code>（美式 <code>/ˈkɑːn.tʊr/</code>）　重音在<b>第一</b>個。<br>
+        <b>quad</b>　<code>/kwɒd/</code>　單音節，<code>qu</code> 讀 <b>kw</b>，不要讀成「kud」。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">我們 故意 提出 多個候選 —— 每 張 相片 <strong>五個</strong> —— 然後 才 排序。 <span class="paren">(propose / rank)</span></div>
+      <div class="zh">We deliberately propose several candidates — five per image — and rank them afterwards.</div>
+      <div class="cue"><b>故意</b>（deliberately）要重：先多提再篩，是設計，不是因為提不準。<br>
+「五個」對應程式裡的 <code>TOP_K = 5</code>，如果教授翻 notebook 看到這個常數，你講的數字要對得上。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>deliberately</b>　<span class="say">di-LIB-uh-ruht-lee</span>　<code>/dɪˈlɪb.ər.ət.li/</code>　重音在<b>第二</b>個。<br>
+        五個音節，中間的 <code>-er-ate-</code> 要輕，不要每個音節一樣重。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">分數 量 的 是「看起來 像 車牌」，<strong>不是</strong>「是不是對的車牌」。<br>
+你 看 左邊，0.90 而且 正確；<br>
+右邊，0.82，但 它 在 <strong>隔壁那輛車</strong> 上。 <span class="paren">(the neighbouring car)</span></div>
+      <div class="zh">The score measures "looks like a plate" — not "is the right plate".<br>
+On the left, 0.90, and it's correct.<br>
+On the right, 0.82 — but on the neighbouring car.</div>
+      <div class="cue"><b>全頁最重要的一句</b>。這句自己承認弱點，比你假裝沒有弱點強得多。<br>
+「不是」要停半秒再加，語氣壓低。<br>
+0.90 / 0.82 照讀，<b>不要</b>說「大約」。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>neighbouring</b>　<span class="say">NAY-buh-ring</span>　<code>/ˈneɪ.bər.ɪŋ/</code>　重音在<b>第一</b>個。<br>
+        ⚠️ 英式拼法有 <code>u</code>（neighbouring），但讀音不變；不要讀成「nee-bor-ing」。
+      </div>
+    </div>
+
+    <div class="blk l2 solo">
+      <div class="en">這 就是 弱點。<br>
+如果 畫面 密，兩 塊 車牌 都 在，<br>
+排序 沒有 方法 知道 標註 指 哪 一 塊。 <span class="paren">(dense scene)</span></div>
+      <div class="zh">That's the weakness.<br>
+In a dense scene, with two plates in frame, the ranking has no way to tell which one the label meant.</div>
+      <div class="skp">&#10178;1　整格可省（省 8 秒），直接跳到「這些是實測數字」</div>
+      <div class="cue">自己先講弱點，台下就不會覺得你在隱瞞。<b>講完停一秒</b>再轉頁。<br>
+「標註」這裡指的是我們手打的答案，不是模型輸出 —— 不要混淆。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S3 定位的水準 ============ -->
+<section class="slide" id="s3">
+  <div class="shead">
+    <span class="snum">3</span>
+    <span class="stitle">Where the locator stands</span>
+    <span class="stime">2:20–3:05</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So how good is it, actually?</div>
+      <div class="en">這些 是 <strong>實測</strong> 數字，不是 估計。 <span class="paren">(measured)</span><br>
+99 張 可評分的相片，recall at 1 是 <strong>51.5%</strong>，recall at 5 是 <strong>60.6%</strong>，門檻 是 IoU 0.5。</div>
+      <div class="zh">These are measured numbers, not estimates.<br>
+On 99 scored images, recall@1 is 51.5% and recall@5 is 60.6%, at an IoU threshold of 0.5.</div>
+      <div class="cue">「實測，不是估計」要重 —— 台下最常假設學生數字是抄的。<br>
+<b>recall@1</b> 讀 <i>recall at one</i>，不要讀「recall 一」。<br>
+<b>IoU</b> 讀 <i>I-O-U</i>（三個字母），第一次出現時可以補一句 <i>intersection over union</i>，之後只讀字母。<br>
+這頁所有數字都在畫面上，<b>照讀就好，不要加「大約」</b>。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>measured</b>　<span class="say">MEH-zhud</span>　<code>/ˈmeʒ.əd/</code>　重音在<b>第一</b>個。<br>
+        中間的 <code>s</code> 讀 <b>zh</b>（像中文「日」的濁音），不要讀成「meh-sured」。<br>
+        <b>threshold</b>　<span class="say">THRESH-hohld</span>　<code>/ˈθreʃ.həʊld/</code>　重音在<b>第一</b>個。<br>
+        開頭 <code>th</code> 是<b>清音</b>（舌尖輕觸上齒，不震動），不要讀成 <i>d</i> 或 <i>t</i>。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en"><strong>78.8%</strong> 過 得到 0.60 的 信心門檻。 <span class="paren">(confidence gate)</span><br>
+意思 是 99 張 之中 <strong>21 張</strong> 在 這裡 停住，永遠 到 不到 後半。</div>
+      <div class="zh">78.8% clear the 0.60 confidence gate.<br>
+Which means 21 of the 99 stop here and never reach the second half.</div>
+      <div class="cue"><b>這句是第 6 頁的伏筆</b>：78.8% 過門檻 ⇒ 78 張有裁切 ⇒ 第 6 頁那個 48.7% 的分母就是 78。台上不用自己把算式講出來，但被問要答得出「99 減 21 是 78」。<br>
+「永遠到不到後半」可以指向隊友 —— 那是交接的伏筆。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>confidence</b>　<span class="say">KON-fi-duhns</span>　<code>/ˈkɒn.fɪ.dəns/</code>　三個音節，重音在<b>第一</b>個。<br>
+        <b>gate</b>　<code>/ɡeɪt/</code>　單音節，長音 <b>ay</b>，尾音 <code>t</code> 要收。
+      </div>
+    </div>
+
+    <div class="blk l1 solo">
+      <div class="en">平均 最佳 IoU 是 <strong>0.50</strong>，<br>
+但 這個 平均 <strong>描述 不到 任何東西</strong>，因為 分佈 是 雙峰。 <span class="paren">(bimodal)</span><br>
+<strong>35%</strong> 的 相片 在 IoU 0.3 以下，不是 在 0.4 附近擺動。<br>
+所以 它 要麼 找到 車牌，要麼 找不到 —— 沒有 中間。</div>
+      <div class="zh">The mean best IoU is 0.50 — but the mean describes nothing, because the distribution is bimodal.<br>
+35% of images sit below IoU 0.3 rather than hovering at 0.4.<br>
+So it either finds the plate or it doesn't — there's no middle.</div>
+      <div class="skp">&#10178;1　「35% 在 0.3 以下」可省（省 6 秒）</div>
+      <div class="cue"><b>這頁最聰明的一句</b>：主動指出「平均值沒有意義」。這顯示我們懂統計，不是背數字。<b>bimodal</b> 放慢。<br>
+最後一句「要麼找到，要麼找不到」是全頁落點，講完停半秒。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>bimodal</b>　<span class="say">bai-MOH-duhl</span>　<code>/baɪˈməʊ.dəl/</code>　重音在<b>第二</b>個。<br>
+        ⚠️ 開頭 <code>bi-</code> 讀 <b>bai</b>（不是「bi」）；重音在 <b>MOH</b>，不是 <i>BAI-moh-duhl</i>。<br>
+        <b>hovering</b>　<span class="say">HOV-uh-ring</span>　<code>/ˈhɒv.ər.ɪŋ/</code>　重音在<b>第一</b>個。
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S4 擷取 ============ -->
+<section class="slide" id="s4">
+  <div class="shead">
+    <span class="snum">4</span>
+    <span class="stitle">Extraction answers "which pixels", not "where"</span>
+    <span class="stime">3:05–3:55</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So we know roughly where. What do we cut out?</div>
+      <div class="en">第三，擷取。 <span class="paren">(extraction)</span><br>
+函式 叫做 <strong>segment(img, quad)</strong>，它 回傳 車牌圖 和 <strong>遮罩</strong>。 <span class="paren">(mask)</span><br>
+它 收 <strong>原始</strong> 相片，不是 前處理過的。 <span class="paren">(original / pre-processed)</span></div>
+      <div class="zh">Third, extraction.<br>
+The function is segment(img, quad) — it returns the plate image and a mask.<br>
+It takes the original image, not the pre-processed one.</div>
+      <div class="cue">「收原始相片」是刻意的設計：<b>避免在同一個資料上做兩次處理</b>，兩次處理會讓誤差疊加，而且除錯時分不出是哪一次的錯。<br>
+函式名照讀 <i>segment</i>，參數 <i>img</i> 讀 <i>image</i>、<i>quad</i> 讀 <i>kwod</i>。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>extraction</b>　<span class="say">ik-STRAK-shuhn</span>　<code>/ɪkˈstræk.ʃən/</code>　三個音節，重音在<b>第二</b>個。<br>
+        <b>segment</b>（動詞）　<span class="say">seg-MENT</span>　<code>/seɡˈment/</code>　⚠️ 動詞重音在<b>後</b>。<br>
+        名詞（a segment）才重音在前：<code>/ˈseɡ.mənt/</code>。講稿用動詞，所以是 seg-<b>MENT</b>。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en"><strong>quad</strong> 故意 寬鬆。 <span class="paren">(loose)</span><br>
+因為 定位 會 過度覆蓋，<br>
+裁切 裡 仍然 有 <strong>保險桿</strong> 和 <strong>車身</strong>。 <span class="paren">(bumper / bodywork)</span></div>
+      <div class="zh">The quad is deliberately loose.<br>
+Because the locator over-covers, so the crop still holds bumper and bodywork.</div>
+      <div class="cue">這句在<b>保護上一頁</b>：定位不準不是唯一問題，擷取本身也故意留多 —— 兩者導致同一件事：裁切裡有雜物。<br>
+<b>bumper / bodywork</b> 兩個詞要清楚，這是全場唯一具體描述「雜物」的地方，台下才想像得到畫面。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>bumper</b>　<span class="say">BUM-puh</span>　<code>/ˈbʌm.pə/</code>　重音在<b>第一</b>個。<br>
+        <b>bodywork</b>　<span class="say">BOD-ee-wurk</span>　<code>/ˈbɒd.i.wɜːk/</code>　重音在<b>第一</b>個。<br>
+        ⚠️ 中間不要斷成「body work」兩個重音，是 <b>BOD</b>-ee-wurk。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">真正 的 輸出 是 <strong>遮罩</strong>。<br>
+255 是 車牌，0 是 <strong>補邊</strong>。 <span class="paren">(padding)</span><br>
+這 一張 裁切，只有 <strong>57%</strong> 是 車牌。<br>
+在 這個 改動 之前，遮罩 永遠 是 255，<br>
+所以 後半 分 不出 補邊 和 車牌，它 對 每 一張 都 一樣 信任。 <span class="paren">(trust every crop equally)</span></div>
+      <div class="zh">The mask is the real output.<br>
+255 is plate, 0 is padding. Only 57% of this crop is plate.<br>
+Before this change the mask was always 255 — so the second half couldn't tell padding from plate, and trusted every crop equally.</div>
+      <div class="cue"><b>這是 A 線對 B 線最大的貢獻</b>，要講得比前面幾句用力。<br>
+「對每張都一樣信任」是問題的<b>後果</b>，不是形容詞 —— 意思是隊友那邊無法知道哪張裁切可信。<br>
+255 / 0 照讀：<i>two five five</i> / <i>zero</i>。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>padding</b>　<span class="say">PAD-ing</span>　<code>/ˈpæd.ɪŋ/</code>　重音在<b>第一</b>個，中間是短音 <b>æ</b>（像「爸」的元音）。<br>
+        <b>equally</b>　<span class="say">EE-kwuh-lee</span>　<code>/ˈiː.kwə.li/</code>　三個音節，重音在<b>第一</b>個。
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S5 幾何校正 ============ -->
+<section class="slide" id="s5">
+  <div class="shead">
+    <span class="snum">5</span>
+    <span class="stitle">Rectification: fit four edges, not one rotated box</span>
+    <span class="stime">3:55–4:55</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So why not just rotate it straight?</div>
+      <div class="en">第四，幾何校正。 <span class="paren">(rectification)</span><br>
+最 直接的 方法 是 <strong>minAreaRect</strong>，<br>
+但 它 在 構造上 就是 一個 <strong>平行四邊形</strong>。 <span class="paren">(parallelogram by construction)</span><br>
+所以 對邊 的 角度差 永遠 是 0.0 度 —— 它 <strong>彎不了</strong>。 <span class="paren">(opposite edges / cannot bend)</span></div>
+      <div class="zh">Fourth, rectification.<br>
+The obvious method is minAreaRect — but it's a parallelogram by construction.<br>
+So opposite edges always differ by 0.0 degrees. It simply cannot bend.</div>
+      <div class="cue"><b>「構造上就是平行四邊形」是本頁的論證核心</b>：不是它不夠準，是它<b>數學上不可能</b>表示梯形。這句講清楚，後面「所以我們分開擬合四條邊」才成立。<br>
+minAreaRect 讀 <i>min-area-rect</i>，不要逐字母拼。<br>
+「彎不了」停半秒。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>rectification</b>　<span class="say">rek-ti-fi-KAY-shuhn</span>　<code>/ˌrek.tɪ.fɪˈkeɪ.ʃən/</code>　五個音節，重音在<b>第四</b>個（KAY）。<br>
+        ⚠️ 很容易讀成「rek-ti-fi-KA-shun」少一個音節；結尾 <code>-tion</code> 讀 <b>shun</b>。<br>
+        <b>parallelogram</b>　<span class="say">pa-ruh-LEL-uh-gram</span>　<code>/ˌpær.əˈlel.ə.ɡræm/</code>　五個音節，重音在<b>第三</b>個（LEL）。<br>
+        ⚠️ 中間兩下 <b>LEL-uh</b> 要連，不要斷成「pa-ral-le-lo-gram」。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">但 透視 剛好 就是 那個 <strong>梯形</strong>。 <span class="paren">(perspective / trapezoid)</span><br>
+這 張 圖 是 <strong>2.2</strong> 和 <strong>0.2</strong> 度，難 的 車牌 可以 到 <strong>10.1</strong> 度。</div>
+      <div class="zh">But perspective is exactly that trapezoid.<br>
+This one is 2.2 and 0.2 degrees — harder plates go up to 10.1.</div>
+      <div class="cue">2.2 / 0.2 / 10.1 全部照讀，不要四捨五入。這三個數字是<b>證據</b>，證明「真實世界的車牌不是平行四邊形」。<br>
+「剛好就是」可以稍停，讓台下看圖。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>perspective</b>　<span class="say">puh-SPEK-tiv</span>　<code>/pəˈspek.tɪv/</code>　三個音節，重音在<b>第二</b>個。<br>
+        <b>trapezoid</b>　<span class="say">TRAP-i-zoyd</span>　<code>/ˈtræp.ɪ.zɔɪd/</code>　重音在<b>第一</b>個。<br>
+        結尾 <code>-zoid</code> 讀 <b>zoyd</b>（一個音節），不要讀成「zo-id」兩個音。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">所以 我們 <strong>分開擬合 每 一條邊</strong>。 <span class="paren">(fit each edge separately)</span><br>
+用 approxPolyDP 做 <strong>起點</strong>，<br>
+每 條邊 一 條 Huber 直線擬合，然後 把 四 條線 <strong>交起來</strong>。 <span class="paren">(seed / fitLine / intersect)</span></div>
+      <div class="zh">So we fit each edge separately.<br>
+We use approxPolyDP as a seed, fit one Huber line per edge, then intersect the four lines.</div>
+      <div class="skp">&#10178;1　函式名可省（省 8 秒），只講「每條邊各自擬合，再交出四個角」</div>
+      <div class="cue">函式名不用解釋細節，<b>但不要跳過「四條線交出四個角」</b> —— 那是為什麼能得到真正的梯形而不是矩形。<br>
+approxPolyDP 讀 <i>approx-poly-D-P</i>；Huber 讀 <i>HOO-ber</i>（人名，奧地利統計學家）。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>intersect</b>　<span class="say">in-tuh-SEKT</span>　<code>/ˌɪn.təˈsekt/</code>　三個音節，重音在<b>第三</b>個。<br>
+        <b>Huber</b>　<span class="say">HOO-ber</span>　<code>/ˈhuː.bər/</code>　重音在第一個，<code>u</code> 讀長音 <b>oo</b>。
+      </div>
+    </div>
+
+    <div class="blk l2">
+      <div class="en">我們 也 防止 <strong>過度修正</strong>。 <span class="paren">(over-correction)</span><br>
+如果 只用 approxPolyDP，整牌準確率 從 <strong>23.2%</strong> 到 <strong>23.2%</strong> —— <br>
+修好 兩 條，弄壞 兩 條。 <span class="paren">(two fixed, two broken)</span><br>
+全量結果：<strong>100 張</strong> 全部 通過 尺寸契約；<br>
+<strong>84 張</strong> 走 透視校正，<strong>16 張</strong> 走 回退的等比縮放。 <span class="paren">(fallback)</span><br>
+有 校正 的 84 張，平均傾角 從 <strong>12.1</strong> 度 到 <strong>0.0</strong> 度。 <span class="paren">(tilt)</span></div>
+      <div class="zh">We also guard against over-correction.<br>
+With approxPolyDP alone, whole-plate accuracy went from 23.2% to 23.2% — two edges fixed, two broken.<br>
+Across the full set, 100 of 100 pass the size contract; 84 take the perspective path and 16 fall back to a plain resize.<br>
+On the 84 that were rectified, mean tilt went from 12.1 degrees to 0.0.</div>
+      <div class="skp">&#10178;2　最後兩行（84 / 16 / 12.1）可省（省 10 秒）；講到「修好兩條，弄壞兩條」就收</div>
+      <div class="cue"><b>23.2% 到 23.2%</b> 是全頁最有說服力的一句：同一個數字，看起來像沒做事，其實是「修好兩條、弄壞兩條」互相抵消。<b>兩個 23.2% 要一樣重</b>，中間停半秒，讓台下自己發現。這說明我們做了 ablation，不是隨便挑一個方法。<br>
+「尺寸契約」= 每張輸出都必須是 480 x 140，這是與隊友的約定，<b>100/100</b> 是全場唯一百分之百的數字，可以講得爽快一點。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>ablation</b>（若用到）　<span class="say">ab-LAY-shuhn</span>　<code>/æbˈleɪ.ʃən/</code>　三個音節，重音在<b>第二</b>個。<br>
+        <b>tilt</b>　<code>/tɪlt/</code>　單音節，中間是短音 <b>ɪ</b>，不要讀成「teelt」。<br>
+        <b>fallback</b>　<span class="say">FAWL-bak</span>　<code>/ˈfɔːl.bæk/</code>　重音在<b>第一</b>個。
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S6 天花板（全段重心） ============ -->
+<section class="slide" id="s6">
+  <div class="shead">
+    <span class="snum">6</span>
+    <span class="stitle">The ceiling is localisation, not recognition　★ 全段重心</span>
+    <span class="stime">4:55–5:40</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="lead">So where do the errors actually come from?</div>
+      <div class="en">第五，這 是 我們 <strong>最重要</strong> 的 一 張圖。<br>
+我們 一直 問 一個 問題：<br>
+錯誤 是 我們 的 辨識 造成的，還是 相片 造成的？<br>
+答案 是 <strong>相片</strong>。 <span class="p2">‖‖</span></div>
+      <div class="zh">Fifth — and this is our most important slide.<br>
+We kept asking one question: are the errors coming from our recognition, or from the photo?<br>
+The answer is the photo.</div>
+      <div class="cue">這頁是全段<b>唯一</b>要明顯放慢的地方。前五頁可以順順講完，這裡要停。<br>
+「答案」之前停一秒；講完「相片」停足 <b>2 秒</b>才繼續 —— 讓台下自己看那條線。<b>這兩秒是刻意的，不是忘詞。</b><br>
+不要在這裡急著給數字，讓畫面先說話。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>ceiling</b>（天花板／上限，標題用）　<span class="say">SEE-ling</span>　<code>/ˈsiː.lɪŋ/</code>　重音在<b>第一</b>個。<br>
+        ⚠️ <code>cei-</code> 讀 <b>see</b>（s 音），<b>不要</b>讀成「kay-ling」。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">IoU 0.5 以下，<strong>26 張</strong>，只有 <strong>11.5%</strong> 整牌正確。 <span class="paren">(whole-plate exact)</span><br>
+IoU 0.5 以上，<strong>52 張</strong>，<strong>67.3%</strong>。<br>
+同 一個 辨識器、同 一個 二值化、同 一套 格式規則，<br>
+<strong>只有 裁切 不同</strong>。 <span class="paren">(binariser / format rules)</span></div>
+      <div class="zh">Below IoU 0.5, that's 26 images, only 11.5% whole-plate correct.<br>
+Above IoU 0.5, 52 images, 67.3%.<br>
+Same reader, same binariser, same format rules — only the crop differs.</div>
+      <div class="cue"><b>「只有裁切不同」是整場最有力的一句</b>。它把所有其他解釋一次排除：不是 OCR 模型差、不是前處理錯、不是格式規則錯 —— 是裁切。<b>每個逗號都停半秒</b>，四個「同一個」要一樣重。<br>
+11.5% 和 67.3% 要對比清楚，兩個數字都重讀。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>whole-plate</b>　<span class="say">HOHL-playt</span>　<code>/həʊl pleɪt/</code>　<b>whole</b> 的 <code>w</code> 不發音（不是「wo-le」）。<br>
+        <b>binariser</b>　<span class="say">BAI-nuh-rai-zuh</span>　<code>/ˈbaɪ.nə.raɪ.zə/</code>　四個音節，重音在<b>第一</b>個。<br>
+        ⚠️ <code>bi-</code> 讀 <b>bai</b>（不是「bi」）；<code>-riser</code> 讀 <b>rai-zuh</b>。
+      </div>
+    </div>
+
+    <div class="blk l1">
+      <div class="en">所以 兩個 數字 永遠 不會 合起來。 <span class="paren">(never merge)</span><br>
+<strong>78 張</strong> 裁切 得到 <strong>48.7%</strong> —— 這 是 使用者 實際 拿到 的。 <span class="paren">(what a user gets)</span><br>
+<strong>26 張</strong> 精選 得到 <strong>69.2%</strong> —— 這 是 好的 裁切 買 到 的。 <span class="paren">(curated)</span></div>
+      <div class="zh">So the two numbers never merge.<br>
+78 crops give 48.7% — that's what a user actually gets.<br>
+26 curated crops give 69.2% — that's what a good crop buys you.</div>
+      <div class="cue">48.7% 是「使用者拿到」、69.2% 是「好裁切買到」—— <b>這個對比就是本頁的結論</b>：差距不是技術天花板，是裁切品質。<br>
+若被問「為什麼是 78 張不是 95」，答：<i>99 images, 21 stop at the confidence gate — 78 crops reach the second half.</i><br>
+<h4 style="margin:8px 0 2px;font-size:12px;color:#8d3226;">⚠️ 上台前確認</h4>如果隊友最後決定不改簡報、仍是舊版 <b>95 張 / 40.0%</b>，這一頁要改唸 <i>95 crops give 40.0%</i>，上面兩句的 IoU 分層也要改成 <b>36 張 8.3% / 59 張 59.3%</b>。上台前問一句就好。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>curated</b>　<span class="say">kyoo-RAY-tid</span>　<code>/kjʊəˈreɪ.tɪd/</code>　三個音節，重音在<b>第二</b>個。<br>
+        ⚠️ 開頭 <code>cu-</code> 讀 <b>kyoo</b>，不要讀成「koo-ray-tid」。
+      </div>
+    </div>
+
+    <div class="blk l1 solo">
+      <div class="en">所以 下 一步 的 努力 <strong>屬於上游</strong>： <span class="paren">(upstream)</span><br>
+用 學習型的車牌偵測器，換掉 顏色遮罩 和 手調分數，<br>
+但 保留 遮罩交接 和 480 x 140 的契約。 <span class="paren">(learned detector / mask handover / contract)</span></div>
+      <div class="zh">So the next effort belongs upstream:<br>
+a learned plate detector replaces the colour mask and the hand-tuned score —<br>
+while keeping the mask handover and the 480 x 140 contract.</div>
+      <div class="cue"><b>這句是整段的方向宣言</b>，也是對「你們為何不用 YOLO」的預先回答：我們知道，而且已經寫進下一步，不是不知道。<br>
+「但保留…契約」很重要 —— 說明換掉定位<b>不需要改動隊友那一半</b>，這是好的系統設計。<br>
+講完停一秒再轉最後一頁。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>upstream</b>　<span class="say">up-STREEM</span>　<code>/ˌʌpˈstriːm/</code>　重音在<b>第二</b>個。<br>
+        <b>handover</b>　<span class="say">HAND-oh-vuh</span>　<code>/ˈhænd.əʊ.və/</code>　重音在<b>第一</b>個。<br>
+        <b>contract</b>（名詞，合約／約定）　<span class="say">KON-trakt</span>　<code>/ˈkɒn.trækt/</code>　⚠️ 名詞重音在<b>前</b>；動詞才重音在後（con-TRACT）。
+      </div>
+    </div>
+
+    <div class="warn">
+      <span class="wt">這一頁不要講</span>
+      <ul>
+        <li>❌ 「我們的 OCR 很差」—— 不是 OCR 的問題，是你自己剛才證明不是</li>
+        <li>❌ 「因為我們時間不夠」—— 不要用時間當理由</li>
+        <li>❌ 「之後會用 YOLO 就會變好」—— 不要承諾未量測的結果，只說「下一步」</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ S7 介面 + 交付 ============ -->
+<section class="slide" id="s7">
+  <div class="shead">
+    <span class="snum">7</span>
+    <span class="stitle">From a rectified crop to a plate string（介面 + 交付）</span>
+    <span class="stime">5:40–6:00</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="en">現在 換手。<br>
+這 是 我們 兩 半 的 <strong>介面</strong>： <span class="paren">(interface)</span><br>
+一個 480 x 140 的 校正裁切，和 它 的 遮罩。<br>
+後半 有 四 節：二值化和辨識、格式校驗、兩路整合、三種範圍的評估。 <span class="paren">(binarise / validation / integration / evaluation)</span></div>
+      <div class="zh">Now I'll hand over.<br>
+This is the interface between our two halves:<br>
+one 480 x 140 rectified crop, and its mask.<br>
+The second half has four sections: binarising and recognition, format validation, two-path integration, and evaluation in three scopes.</div>
+      <div class="cue"><b>只講四節的名字，不要解釋</b> —— 解釋是隊友的工作，你多講會搶他的內容而且超時。<br>
+「介面」要重：這是你這一半交出去的東西，也是他那一半的輸入。</div>
+      <div class="pron">
+        <span class="wt">這頁的讀音</span>
+        <b>interface</b>　<span class="say">IN-tuh-fays</span>　<code>/ˈɪn.tə.feɪs/</code>　三個音節，重音在<b>第一</b>個。<br>
+        ⚠️ 重音在 <b>IN</b>，不是 <i>in-ter-FACE</i>。<br>
+        <b>integration</b>　<span class="say">in-ti-GRAY-shuhn</span>　<code>/ˌɪn.tɪˈɡreɪ.ʃən/</code>　重音在<b>第三</b>個。
+      </div>
+    </div>
+
+    <div class="blk l1 solo">
+      <div class="en">我 交 給 我 的 隊友。 <br>
+<strong>Over to you, ______.</strong> <span class="p1">‖</span></div>
+      <div class="zh">I'll hand over to my teammate.<br>
+Over to you, ______.</div>
+      <div class="cue">講到名字時<b>望住他</b>，講完停半秒就收。<b>不要</b>再補「謝謝」或「那接下來」—— 多一句就變成兩個人在台上互相客套。<br>
+名字上台前確認讀音，空白處填隊友的英文名。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 數字速查 ============ -->
+<section class="slide" id="n">
+  <div class="shead">
+    <span class="snum">N</span>
+    <span class="stitle">數字速查（上台前掃一眼）</span>
+    <span class="stime">不佔時間</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1 solo">
+      <div class="cheat">資料  1,491 張 / 抽 <span class="hl">100</span> / 丟 16 / 89 正常 10 難 1 讀不到
+      指紋 <span class="hl">bd1a4489</span>
+
+定位  99 張可評分
+      recall@1 <span class="hl">51.5%</span>   recall@5 <span class="hl">60.6%</span>   IoU &gt;= 0.5
+      過 0.60 門檻 <span class="hl">78.8%</span>（= 78 張，21 張停住）
+      平均最佳 IoU 0.50（雙峰，35% 低於 0.3）
+      TOP_K = 5
+
+擷取  遮罩 255=車牌 0=補邊 ／ 這張只有 <span class="hl">57%</span> 是車牌
+      100/100 遮罩小於整張矩形
+
+校正  minAreaRect 對邊差 0.0 度（不可能彎）
+      這張 2.2 / 0.2 度，最斜 10.1 度
+      純 approxPolyDP <span class="hl">23.2% → 23.2%</span>（修 2 壞 2）
+      84 透視 / 16 回退 ／ 傾角 <span class="hl">12.1° → 0.0°</span>
+
+天花板 IoU&lt;0.5  n=<span class="hl">26</span> → <span class="hl">11.5%</span>
+      IoU&gt;=0.5 n=<span class="hl">52</span> → <span class="hl">67.3%</span>
+      <span class="hl">78</span> 張裁切 → <span class="hl">48.7%</span>（使用者拿到）
+      <span class="hl">26</span> 張精選 → <span class="hl">69.2%</span>（好裁切買到）
+
+交付  480 x 140 + mask → 隊友的 §6 §7 §8 §9
+
+<span class="warn2">若簡報未改：95 張 / 40.0% / 36 張 8.3% / 59 張 59.3%</span></div>
+      <div class="cue">上台前 30 秒只看這一格。<b>不要</b>背整份講稿，背數字就好 —— 句子可以現場組織，數字不行。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 交接 + Q&A ============ -->
+<section class="slide" id="h">
+  <div class="shead">
+    <span class="snum">H</span>
+    <span class="stitle">Q&amp;A 預備</span>
+    <span class="stime">被問才用</span>
+  </div>
+  <div class="sbody">
+
+    <div class="blk l1">
+      <div class="lead">「為什麼準確率只有 48.7%？」</div>
+      <div class="en">✅ That's over every crop the pipeline produces, including the ones where localisation was poor.<br>
+On the 26 crops where localisation was good, it's <strong>69.2%</strong>.<br>
+The gap between those two numbers is the whole point of our evaluation.</div>
+      <div class="zh">✅ 那個分母是管線產生的每一張裁切，包括定位很差的那些。定位好的 26 張是 69.2%。這兩個數字的差距就是我們評估的重點。</div>
+      <div class="cue">不要辯解「48.7% 已經不錯」—— <b>承認低，然後指出差距的原因</b>，這才是我們整份報告的論點。</div>
+    </div>
+
+    <div class="blk l1">
+      <div class="lead">「48.7% 和 39.4% 為什麼不同？」</div>
+      <div class="en">✅ Different denominators, on purpose.<br>
+<strong>48.7%</strong> is over the 78 crops that have a crop at all.<br>
+<strong>39.4%</strong> is over all 99 images end-to-end, so the 21 that localisation missed count as wrong.<br>
+We never merge them.</div>
+      <div class="zh">✅ 分母刻意不同。48.7% 是 78 張有裁切的；39.4% 是 99 張全流程，包含定位失敗的 21 張。我們從不合併。</div>
+      <div class="cue">這是最可能被追問的一題，因為畫面上兩個數字並排。<b>「刻意」</b>要講出來 —— 那代表我們知道自己在做什麼。</div>
+    </div>
+
+    <div class="blk l1">
+      <div class="lead">「為什麼不用 YOLO／深度學習做定位？」</div>
+      <div class="en">✅ That's our next step, and we've said so on the slide.<br>
+We built the interface and the mask contract first, so the detector can be swapped without touching the second half.</div>
+      <div class="zh">✅ 那是我們的下一步，投影片上已經寫了。我們先把介面和遮罩契約建好，所以換偵測器不用改動後半。</div>
+      <div class="cue"><b>不要</b>說「時間不夠」或「我們不會」。答案是「順序問題」：先建契約，再換模型。<br>
+不要承諾「換了會到多少」—— 我們沒有量測過。</div>
+    </div>
+
+    <div class="blk l1">
+      <div class="lead">「定位只有 51.5%，這個方法還有意義嗎？」</div>
+      <div class="en">✅ The point of the project is the <strong>staged</strong> evaluation.<br>
+A single end-to-end number cannot tell you whether the problem is the crop or the reader.<br>
+Ours can — and it says the crop.</div>
+      <div class="zh">✅ 這個專案的重點是分階段評估。單一個端到端數字說不出問題在裁切還是辨識；我們的說得出，而且答案是裁切。</div>
+      <div class="cue">這題要答得穩：<b>弱點被量化本身就是貢獻</b>，不是失敗。</div>
+    </div>
+
+    <div class="blk l2">
+      <div class="lead">「標註是誰做的？」</div>
+      <div class="en">✅ We typed every plate string by hand from the images.<br>
+The dataset only ships bounding boxes.<br>
+99 of the 100 have a string; one is marked unreadable and excluded from every metric.</div>
+      <div class="zh">✅ 每個車牌字串都是我們看圖手打的，資料集只給邊界框。100 張裡 99 張有字串，1 張標為讀不到並從所有指標排除。</div>
+      <div class="cue">這是加分題，答得肯定一點。</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="end">A 線 ｜ CIS342 Group 6 ｜ 台上版講稿</div>
+
+</div>
+</body>
+</html>
