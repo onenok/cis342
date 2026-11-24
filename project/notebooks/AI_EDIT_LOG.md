@@ -1,3 +1,59 @@
+## 2026-11-24 — 新增 `[INT-05]` Gradio 互動 Demo（顯示每個處理階段）
+
+**摘要**：`[INT-04]` 只給答案；這一格多給「過程」。上傳一張圖後，把
+定位候選、選中的四邊形、擷取、校正、二值化、切字框全部畫成一張總覽圖，
+右邊配逐階段文字紀錄。答錯時可當場歸因。
+
+**兩格**
+
+- `[INT-05]` 定義 `explain_pipeline(source, loose=False)` 與 `launch_demo(**kw)`
+- 最後一格是執行入口，預設 `RUN_GRADIO_DEMO = False`
+
+**`explain_pipeline()` 的輸出**
+
+| 面板 | 內容 |
+|---|---|
+| 00 input | 原始尺寸 |
+| 01 preprocess | 光照補償＋去噪後 |
+| 02 candidates | 全部候選四邊形（含 `i:score` 標註） |
+| 03 chosen quad | 選中的那一個，score 寫在圖上 |
+| 04 segment plate | 擷取出的車牌 |
+| 05 plate mask | 遮罩（255=車牌） |
+| 06 rectified | 校正到 480x140 |
+| 07 rectified mask | 校正後的遮罩 |
+| 08 binarised | 二值化結果與白色佔比 |
+| 09 char boxes | 自研切字框綠框疊圖 |
+| 10（無圖） | 整圖兜底結果寫在文字紀錄裡 |
+
+文字紀錄逐行印 `[0]…[9]`，每個階段都帶實測數值（候選數、遮罩填充率、
+二值化白色佔比、char_boxes 數量、融合 path），最後一段固定是
+「車牌／格式合法／信心／路徑」。
+
+**刻意避開的 Gradio 陷阱**
+
+1. 輸出只有 **一個 `gr.Image` + 一個 `gr.Textbox`**。不用 `Gallery` / `DataFrame` / `Plot`
+   —— 這幾個 API 在 4.x→5.x→6.x 之間改過簽名，是「昨天能跑今天爆掉」的來源。
+2. `gr.Image` 的 `sources=` 在 gradio 3.x 叫 `source=`。用 `try/except TypeError`
+   包一層，兩種都吃得到。
+3. 拿掉 `variant='primary'`（舊版沒有）。
+4. 不用 `share=True`（要外網、慢、且會另外開通道），Colab 走 inline。
+5. gradio 沒裝時 `launch_demo()` 印「先 `pip install gradio`」，不丟 traceback；
+   而且 `[INT-04]` 完全不依賴 gradio，所以就算 gradio 版本炸掉，現場仍有一條可用路徑。
+6. 執行入口預設關閉：Run All 時不會安裝 30 MB 套件、也不會卡在等待。
+
+**實測**（`.venv`，gradio 6.32.0）
+
+- `explain_pipeline()` 對路徑、numpy RGB、`None` 三種輸入都正常（`None` 回 `(None, 錯誤訊息)`）
+- `loose=False` 走整圖兜底（`XU5 / wholeimage`）；`loose=True` 會把
+  `[3]~[7]` 全部走過一遍（擷取 18x32 → 校正 480x140 → 二值化 → 切 3 個字框 → 融合）
+- `launch_demo(prevent_thread_lock=True)` 起得來，`GET /` 回 **200**，`demo.close()` 正常
+- 總覽圖 3 欄 × 4 列，標題與數值可讀（`debug/_int05_tile.png` 為樣本，已刪）
+
+**同步**：兩份 notebook 各追加兩格（現在各 74 格）；交付版 21 個輸出格未受影響；
+既有 72 格的內容 hash 前後不變。兩份都補了 cell `id`。
+
+---
+
 ## 2026-11-24 — 新增 `[INT-04]` 現場上傳測試入口（不用 Gradio）
 
 **摘要**：教授現場會給幾張測試圖，需要「上傳 → 辨識 → 看結果」。原本 §10 的
