@@ -1,3 +1,40 @@
+## 2026-11-24 — `[INT-00]` 加裝 CJK 字型、加 Gradio 開關
+
+**摘要**：兩件小事，都在 `[INT-00]` 內完成。
+
+**1. 自動裝 `fonts-noto-cjk`**
+
+新增 `_install_cjk_font()`，在 `bootstrap_demo()` 最前面呼叫。Colab 預設沒有 CJK 字型，
+圖上任何中文都會變方框（`Glyph missing from font(s) DejaVu Sans` 那串警告）。
+
+| 情況 | 行為 |
+|---|---|
+| `/usr/share/fonts/.../NotoSansCJK-Regular.ttc` 已存在 | 印「已存在」直接跳過 |
+| 沒有字型、有 `apt-get`（Colab） | `apt-get -y install fonts-noto-cjk`，約 10–20 秒 |
+| 沒有 `apt-get`（本機 Windows） | 印「跳過字型安裝（本機環境正常）」 |
+
+裝好後會掃 `fontManager.ttflist`，把 `Noto Sans CJK JP/SC/TC/HK` 塞進
+`rcParams['font.sans-serif']` 最前面，並設 `axes.unicode_minus=False`
+（否則負號也會變方框）。找不到就安靜略過，不影響其他流程。
+
+**2. Gradio 開關搬進 `[INT-00]`**
+
+執行格新增 `LAUNCH_GRADIO_AFTER_BOOT`（預設 `False`）。設 `True` 且 bootstrap 成功時，
+會自動補裝 gradio 然後直接 `launch_demo()`，不必再回去 `[INT-05]` 那格。
+bootstrap 未就緒時印提示而不開介面。
+
+**實測**（本機 Windows，無 apt-get）
+
+```
+[INT-00] 沒有 apt-get，跳過字型安裝（本機環境正常）
+[INT-00] 完成 18/18 格，耗時 7.9 秒
+[INT-00] 可用：present_test()  /  launch_demo()  → 準備就緒
+```
+
+`explain_pipeline()` 正常出圖，中文標題渲染正常（本機有系統字型）。
+
+---
+
 ## 2026-11-24 — 新增 `[INT-00]` 快速啟動：示範前只載入必要函式（不下載資料集）
 
 **摘要**：從 GitHub 點開的 Colab 是全新 runtime，所有函式都未定義，但 Run All 會下載
