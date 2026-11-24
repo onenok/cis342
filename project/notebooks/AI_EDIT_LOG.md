@@ -1,3 +1,46 @@
+## 2026-11-24 — 新增 `[INT-00]` 快速啟動：示範前只載入必要函式（不下載資料集）
+
+**摘要**：從 GitHub 點開的 Colab 是全新 runtime，所有函式都未定義，但 Run All 會下載
+1 GB 資料集＋跑 100 張全量匯出，7 分鐘的示範時間根本不夠。所以加一格
+`bootstrap_demo()`：抓交付版 notebook 的原始碼，只 exec 示範路徑需要的 18 個 cell。
+
+**載入清單**（順序即執行順序）
+
+`S0-1` `S0-2` `S0-3` `S0-4` `PRE-01` `LOC-01` `LOC-02` `SEG-01` `GEO-01`
+`OCR-01` `OCR-02` `POST-01` `INT-01` `INT-02` `INT-03` `INT-03b` `INT-04` `INT-05`
+
+**刻意排除**：`D1-04` / `D1-05`（資料集下載）、所有 `# --- self test ---`。
+所以不會碰網路資料集，也不會產出 `shared/` 檔案。
+
+**為什麼要 `INT-01`**：`STAGE_RECTIFY` / `STAGE_SEGMENT` / `STAGE_MASK` 三個常數定義在
+`[INT-01]` 的 cell 開頭，而 `[INT-02]` 的 module-level `INT_RECT_DIR = …` 會用到它們。
+第一次漏了 `INT-01`，`INT-02` 直接 `NameError`。這是把「只要函式」想得太窄的結果 ——
+cell 之間有常數依賴，不能只看函式名。
+
+**兩個 bug（實測抓到並修好）**
+
+1. cell 標籤比對：`DEMO_NEEDS` 寫 `'[S0-1]'`（含方括號），regex 抓出來的是 `S0-1`（不含），
+   所以第一次 0/18。改成 `{n.strip('[]'): i}` 統一去括號。
+2. `missing` 檢查同一問題：`n not in ok` 全部誤判為未載入。同樣 `strip('[]')`。
+
+**實測**（`.venv`，全新 namespace，只 exec bootstrap 定義格後呼叫）
+
+```
+[INT-00] 完成 18/18 格，耗時 9.3 秒
+[INT-00] 可用：present_test()  /  launch_demo()  → 準備就緒
+```
+
+載入後直接可用：`present_test()` 回 `XU5 / wholeimage`、`explain_pipeline()` 回
+`(330, 1353, 3)` 的總覽圖、`launch_demo()` 起得來且 `GET /` 回 200。
+
+**備援**：抓不到 URL 時會提示把 `.ipynb` 上傳到 `/content`，再
+`bootstrap_demo(url="/content/CIS342_Group6_Project_LPR.ipynb")`。
+
+**同步**：兩份 notebook 各追加兩格（現在各 76 格）；交付版 21 個輸出格未受影響；
+既有 74 格內容 hash 不變。
+
+---
+
 ## 2026-11-24 — 新增 `[INT-05]` Gradio 互動 Demo（顯示每個處理階段）
 
 **摘要**：`[INT-04]` 只給答案；這一格多給「過程」。上傳一張圖後，把
