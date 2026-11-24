@@ -1,3 +1,45 @@
+## 2026-11-24 — 新增 `[INT-04]` 現場上傳測試入口（不用 Gradio）
+
+**摘要**：教授現場會給幾張測試圖，需要「上傳 → 辨識 → 看結果」。原本 §10 的
+`try_plate()` 在 Colab 其實已經會跳上傳框，但它綁在「選資料夾 → 選編號」的流程裡，
+一次多張不好用、也不好現場操作。所以新增兩格，只做一件事：
+
+- `[INT-04]` 定義 `present_test(paths=None, upload=None, save_dir=None, figures=True)`
+- 最後一格是執行入口，預設 `RUN_LIVE_TEST = False`
+
+**為什麼不用 Gradio**：Gradio 要額外安裝、另開連線埠，Colab 上常因版本衝突爆掉，
+而需求只是「上傳檔案」。Colab 內建 `google.colab.files.upload()` 就夠，
+且失敗時自動退回「貼上路徑」模式，不會整格紅掉。
+
+**行為**
+
+| 情況 | 走法 |
+|---|---|
+| Colab，`paths=None` | `files.upload()` 跳上傳框，可一次選多張，落地 `/content/uploads/` |
+| 上傳不可用（本機／無 colab 模組） | 退回 `input()` 貼路徑，多張用逗號分隔 |
+| 指定 `paths=[...]` | 直接跑，不互動（給程式呼叫） |
+| 多張 | 逐張印一行，最後再印一張彙總表（檔名／預測／格式合法／信心／路徑） |
+| 單張 | 只印一行，不印表 |
+| 找不到檔／辨識出錯 | 印訊息後跳過，不中斷整批 |
+
+**刻意做成「預設不執行」**：`RUN_LIVE_TEST = False`。原因是 Run All 時若直接呼叫
+`files.upload()`，Colab 會停在等待上傳而讓整份 notebook 卡住 —— 交付版要能一鍵跑完。
+現場要用時改 `True`，或在新的臨時格直接寫 `present_test()`。
+
+**實測**（`.venv` + 兩張 `data/images` 整車照）
+
+- 兩張都跑完、印出表格、`valid=True`，無例外
+- 單張：`XU5 / fallback-wholeimage`，只印一行
+- 非互動環境 `input()` → 捕捉 `EOFError`，回傳 `[]`，不崩潰
+- 不存在的路徑 → 印「找不到檔案」後回傳 `[]`
+- 執行入口在 `RUN_LIVE_TEST = False` 時確認不會觸發上傳
+
+**同步**：`notebooks/lpr_dev.ipynb` 與 `colab_manually_sync/…ipynb` 都追加同樣兩格
+（現在各 72 格）；交付版的 21 個既有輸出格未受影響。兩份都補了 cell `id`
+（原本 append 時缺 id，nbformat 會警告）。
+
+---
+
 ## 2026-11-23 — 合 PR #8（78 張口徑），修兩處文字，重畫第 8 頁圖表
 
 **摘要**：隊友把整條 B 線換成 78 張口徑（PR #8，`ca8e6de`），並用我給的 17 個 stem 自驗通過。
