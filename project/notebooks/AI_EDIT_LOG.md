@@ -1,3 +1,37 @@
+## 2026-11-24 — 修 Gradio「階段總覽」空白（改回傳 PNG 路徑）
+
+**摘要**：Colab 實測回報「逐階段紀錄有內容，但階段總覽的圖是空白（一直轉圈）」。
+這是 Gradio 輸出 numpy 陣列的序列化問題，改成輸出 PNG 檔案路徑後解決。
+
+**現象**：文字框完整更新（`[0]`～`[9]` 與最終四行都在），只有左邊 `gr.Image` 空白。
+文字有更新代表 handler 沒有拋錯，所以問題在「把 ndarray 交給 Gradio」這一步。
+
+**原因**：Gradio 收到 ndarray 後會自己轉成 PIL Image 再存檔。
+`fig.canvas.buffer_rgba()` 切出來的 `[:, :, :3]` 是**負 stride 的 view**
+（BGR/RGBA 反向切片），PIL 對非 c-contiguous 陣列會失敗或產生空白，
+而且失敗是靜默的 —— 文字照樣回傳，只有圖不見。
+
+**改法（三層）**
+
+1. `np.ascontiguousarray(...)` 包住切片結果，消除負 stride。
+2. 新增 `save_png=True` 參數：直接把圖存成 PNG（`PIL.Image.fromarray(...).save()`），
+   **回傳檔案路徑**而不是陣列。Gradio 吃路徑最穩，不需要在伺服器端再序列化一次。
+   預設路徑 `/content/_int05_last.png`（本機則為 cwd）。
+3. `_run` 包 `try/except`，例外會把 traceback 寫進文字框而不是讓介面靜默無反應 ——
+   現場出問題時可以直接看到原因。
+
+**保留**：`explain_pipeline()` 不給 `save_png` 時仍回傳 ndarray（給程式用、給報告出圖用）。
+
+**實測**
+
+```
+explain_pipeline(p, save_png=True)  ->  'debug/_int05_path.png'（406,860 bytes，檔案存在）
+explain_pipeline(p)                 ->  ndarray (330, 1353, 3)   # 舊行為不變
+launch_demo(prevent_thread_lock=True) -> GET / 回 200
+```
+
+---
+
 ## 2026-11-24 — 修 Colab 實測抓到的三個問題（字型偵測、Gradio 卡住、覆蓋率）
 
 **摘要**：使用者實際在 Colab 跑 `[INT-00]`，日誌暴露三個問題，逐一修好。
